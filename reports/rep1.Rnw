@@ -1,0 +1,109 @@
+\documentclass[12pt]{article}
+\usepackage[spanish]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage[margin=1in]{geometry}
+
+\fancyhead[R]{
+     \includegraphics[width=2cm]{logo_base_nombre.png}
+}
+\fancyhead[L]{\parbox[b]{\dimexpr\linewidth-2.5cm\relax}{
+\sffamily \bfseries\hfill  
+}
+}
+
+\pagestyle{fancy}
+
+\title{Reporte}
+\author{Paulina Preciado López}
+
+\begin{document}
+\maketitle
+\thispagestyle{fancy}
+
+
+\begin{abstract}
+Este es el abstract del documento
+\end{abstract}
+
+
+\section{Introducción}
+\label{sec:intro}
+
+Aquí se describe de que va el proyecto
+
+\section{Análisis}
+\subsection{Análisis exploratorio de datos}
+
+Esta sección presenta los estadísticos resumen y gráficos exploratorios
+
+El chunk inicial carga el proyecto y establece el directorio de trabajo (es invisible)
+
+<<R_startup, message = FALSE, warning=FALSE, tidy = TRUE, echo = FALSE>>=
+require(ProjectTemplate)
+require(knitr)
+setwd("/Users/Preciado/Documents/Learning/R_Latex/r_knitr_tests")
+load.project()
+@
+
+Ahora a explorar
+
+<<1_basic_datos, message = FALSE, warning=FALSE, tidy = TRUE, echo = TRUE>>=
+dat%>% str()
+dat%>% head()
+dat%>% summary()
+@
+
+Hagamos un xtable porque se ve mejor que el display directo de \texttt{R}
+
+<<1b_xtable, message = FALSE, warning=FALSE, tidy = TRUE, echo = FALSE,results = "asis">>=
+t1 <- dat%>% 
+     group_by(sex) %>%
+     summarise(n = n(),
+               min = min(income),
+               q.25 = quantile(income, .25),
+               mediana =  quantile(income, .5),
+               q.75 = quantile(income, .25),
+               max = max(income)
+     ) %>%
+     ungroup()
+xt1 <- xtable(t1, caption = "Tabla", label = "tab:Tabla1", digits = 0)
+print(xt1)
+@
+
+Una gráfica exploratoria con caption y etiqueta y formato de latex. 
+
+<<2_eda_plot, message = FALSE, warning=FALSE, tidy = TRUE, echo = FALSE, fig.cap="Esta es una gráfica exploratoria", fig.width = 10, fig.height = 5, fig.align='center'>>=
+p1 <- ggplot(dat, aes(y = income, x = perc.afqt,
+                      color = sex)) +
+     geom_point(size = 3, alpha = 0.7)
+
+p2 <- ggplot(dat, aes(y = income, x = educ,
+                             color = sex)) +
+      geom_point(size = 3, alpha = 0.7)
+
+p3 <- ggplot(dat, aes(x = log(income), y = ..density..,
+                             fill = sex)) +
+      geom_histogram(alpha = 0.7, color = 0)
+
+
+p4 <- ggplot(dat, aes(y = educ, x = sex,
+                             fill = sex)) +
+      geom_boxplot()
+
+grid.arrange(p1, p2, p3, p4)
+
+@
+
+Voy a hacer una referecia a la sección \ref{sec:intro} y a la tabla \ref{tab:Tabla1} y por último a la Figura \ref{fig:2_eda_plot}. También muestro una ecuación \ref{eq:formula1}
+
+\begin{eqnarray}
+ y &=& x^4 + 4      \nonumber \\
+   &=& (x^2+2)^2 -4x^2 \nonumber \\
+   &\le&(x^2+2)^2
+   \label{eq:formula1}
+\end{eqnarray}
+
+\end{document}
